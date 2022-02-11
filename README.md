@@ -1,94 +1,79 @@
+# Issue Reproduction
 
+This project is a bug reproduction
 
-# Example
+## Setup
 
-This project was generated using [Nx](https://nx.dev).
+To run the tests illustrating the issue here, you will need a local [postgresql database](https://www.postgresql.org/download/).
 
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>
+The following `psql` commands can get you started with local credentials and databases:
 
-🔎 **Smart, Fast and Extensible Build System**
+```psql
+postgres=# CREATE ROLE example WITH LOGIN PASSWORD '{enter local password here}';
+# note: this permission is required to install postgresql extensions (such as "uuid-ossp")
+postgres=# ALTER USER example WITH SUPERUSER;
+# Create app database (runtime, not needed to run integration tests)
+postgres=# CREATE DATABASE "example";
+postgres=# GRANT ALL PRIVILEGES ON DATABASE "example" TO example;
+postgres=# ALTER DATABASE "example" OWNER TO example;
+# Create test database
+postgres=# CREATE DATABASE "example-test";
+postgres=# GRANT ALL PRIVILEGES ON DATABASE "example-test" TO example;
+postgres=# ALTER DATABASE "example-test" OWNER TO example;
+```
 
-## Adding capabilities to your workspace
+You can run the `\l` pg command to verify your local setup:
 
-Nx supports many plugins which add capabilities for developing different types of applications and different tools.
+```bash
+postgres-# \l
+                             List of databases
+     Name     |  Owner  | Encoding | Collate | Ctype |  Access privileges  
+--------------+---------+----------+---------+-------+---------------------
+ example      | example | UTF8     | C       | C     | =Tc/example        +
+              |         |          |         |       | example=CTc/example
+ example-test | example | UTF8     | C       | C     | =Tc/example        +
+              |         |          |         |       | example=CTc/example
+```
 
-These capabilities include generating applications, libraries, etc as well as the devtools to test, and build projects as well.
+Finally, install the dependencies:
 
-Below are our core plugins:
+```bash
+yarn install
+```
 
-- [React](https://reactjs.org)
-  - `npm install --save-dev @nrwl/react`
-- Web (no framework frontends)
-  - `npm install --save-dev @nrwl/web`
-- [Angular](https://angular.io)
-  - `npm install --save-dev @nrwl/angular`
-- [Nest](https://nestjs.com)
-  - `npm install --save-dev @nrwl/nest`
-- [Express](https://expressjs.com)
-  - `npm install --save-dev @nrwl/express`
-- [Node](https://nodejs.org)
-  - `npm install --save-dev @nrwl/node`
+You can check the running "example-app" application if you wish by running
 
-There are also many [community plugins](https://nx.dev/community) you could add.
+```bash
+yarn nx run example-app:serve
+```
 
-## Generate an application
+## Reproduce
 
-Run `nx g @nrwl/react:app my-app` to generate an application.
+It seems something change in `ts-jest@27.1.3` causing the globalTeardown script to crash (and the tests to fail)
 
-> You can use any of the plugins above to generate applications as well.
+- the master branch illustrate a working scenario using `ts-jest` locked to `27.1.2`
+- a branch named `reproduction/ts-jest-27.1.3` illustrate the bug (only change being the update from `27.1.2` to `27.1.3`)
 
-When using Nx, you can create multiple applications and libraries in the same workspace.
+### Steps
 
-## Generate a library
+Run on master branch and notice the successful tests
 
-Run `nx g @nrwl/react:lib my-lib` to generate a library.
+```bash
+git checkout master
+yarn install
+yarn run test:all
+```
 
-> You can also use any of the plugins above to generate libraries as well.
+>  NX   Successfully ran target test for 3 projects
 
-Libraries are shareable across libraries and applications. They can be imported from `@example/mylib`.
+Then checkout the branch and notice an error:
 
-## Development server
+```bash
+git checkout reproduction/ts-jest-27.1.3
+yarn install
+yarn run test:all
+```
 
-Run `nx serve my-app` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
-
-## Code scaffolding
-
-Run `nx g @nrwl/react:component my-component --project=my-app` to generate a new component.
-
-## Build
-
-Run `nx build my-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `nx test my-app` to execute the unit tests via [Jest](https://jestjs.io).
-
-Run `nx affected:test` to execute the unit tests affected by a change.
-
-## Running end-to-end tests
-
-Run `nx e2e my-app` to execute the end-to-end tests via [Cypress](https://www.cypress.io).
-
-Run `nx affected:e2e` to execute the end-to-end tests affected by a change.
-
-## Understand your workspace
-
-Run `nx graph` to see a diagram of the dependencies of your projects.
-
-## Further help
-
-Visit the [Nx Documentation](https://nx.dev) to learn more.
-
-
-
-## ☁ Nx Cloud
-
-### Distributed Computation Caching & Distributed Task Execution
-
-<p style="text-align: center;"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-cloud-card.png"></p>
-
-Nx Cloud pairs with Nx in order to enable you to build and test code more rapidly, by up to 10 times. Even teams that are new to Nx can connect to Nx Cloud and start saving time instantly.
-
-Teams using Nx gain the advantage of building full-stack applications with their preferred framework alongside Nx’s advanced code generation and project dependency graph, plus a unified experience for both frontend and backend developers.
-
-Visit [Nx Cloud](https://nx.app/) to learn more.
+> [TSError: apps/example-app-integration/jest/globalTeardown.ts:5:13 - error TS2695: Left side of comma operator is unused and has no side effects.
+>       
+>       5     return (0, tslib_1.__awaiter)(this, void 0, void 0, function* () {

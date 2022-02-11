@@ -1,4 +1,8 @@
 {
   "version": 2,
-  "projects": {}
+  "projects": {
+    "database": "libs/database",
+    "example-app": "apps/example-app",
+    "example-app-integration": "apps/example-app-integration"
+  }
 }
