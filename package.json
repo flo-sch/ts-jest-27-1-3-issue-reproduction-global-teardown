@@ -1,0 +1,32 @@
+{
+  "name": "example",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "dependencies": {
+    "fastify": "^3.27.1",
+    "knex": "^1.0.3",
+    "pg": "^8.7.3"
+  },
+  "devDependencies": {
+    "@nrwl/cli": "13.8.1",
+    "@nrwl/eslint-plugin-nx": "^13.8.1",
+    "@nrwl/jest": "^13.8.1",
+    "@nrwl/js": "13.8.1",
+    "@nrwl/node": "^13.8.1",
+    "@nrwl/tao": "13.8.1",
+    "@nrwl/workspace": "13.8.1",
+    "@types/node": "16.11.7",
+    "@typescript-eslint/eslint-plugin": "^5.11.0",
+    "@typescript-eslint/parser": "^5.11.0",
+    "eslint": "^8.8.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-jest": "^26.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "jest": "^27.5.1",
+    "prettier": "^2.5.1",
+    "tsconfig-paths": "^3.12.0",
+    "typescript": "~4.5.2"
+  }
+}
